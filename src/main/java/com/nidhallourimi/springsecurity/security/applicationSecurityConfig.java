@@ -15,6 +15,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.nidhallourimi.springsecurity.security.ApplicationUserPermission.*;
 import static com.nidhallourimi.springsecurity.security.ApplicationUserRole.*;
@@ -36,11 +39,11 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
      http
-            // .csrf().disable()//cross site request forgery
+            .csrf().disable()//cross site request forgery
             /* .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
              .and()*/
              .authorizeHttpRequests()
-             .antMatchers("/","/css/*","/jss/*").permitAll()
+             .antMatchers("/","/css/*","/jss/*","/login").permitAll()//*
              .antMatchers("/api/**").hasRole(STUDENT.name())
 //             .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
 //             .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
@@ -49,7 +52,27 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
              .anyRequest()
              .authenticated()
              .and()
-             .httpBasic();
+             //.httpBasic();
+             .formLogin()
+                 .loginPage("/login") // * or .permitAll() //this is gives me  an error but it should work
+                 .defaultSuccessUrl("/courses",true)
+                .passwordParameter("password")// "*"name of my input in html
+                .usernameParameter("username")//
+             .and()
+             .rememberMe()
+                 .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) //tokenRepository() you own repo (postgress,mysql) //defaults to 2 weeks
+                 .key("somethingVerySecured") //best practice using the default  one  provided by spring security
+             .rememberMeParameter("remember-me")
+             .and()
+             .logout()
+                 .logoutUrl("/logout")
+                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout",  "GET"))
+                 .clearAuthentication(true)
+                 .invalidateHttpSession(true)
+                 .deleteCookies("JSESSIONID","remember-me","JSESSIONID")
+                 .logoutSuccessUrl("/login");
+
+
     }
 
     @Override
