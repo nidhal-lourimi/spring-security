@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import static com.nidhallourimi.springsecurity.security.ApplicationUserPermission.*;
 import static com.nidhallourimi.springsecurity.security.ApplicationUserRole.*;
@@ -35,7 +36,9 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
      http
-             .csrf().disable()
+            // .csrf().disable()//cross site request forgery
+            /* .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+             .and()*/
              .authorizeHttpRequests()
              .antMatchers("/","/css/*","/jss/*").permitAll()
              .antMatchers("/api/**").hasRole(STUDENT.name())
