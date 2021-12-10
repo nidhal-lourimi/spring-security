@@ -2,6 +2,7 @@ package com.nidhallourimi.springsecurity.security;
 
 
 import com.nidhallourimi.springsecurity.auth.ApplicationUserService;
+import com.nidhallourimi.springsecurity.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -40,6 +42,9 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().disable()//cross site request forgery
             /* .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
              .and()*/
+             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+
+             .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
              .authorizeHttpRequests()
              .antMatchers("/","/css/*","/jss/*","/login").permitAll()//*
              .antMatchers("/api/**").hasRole(STUDENT.name())
@@ -48,27 +53,9 @@ public class applicationSecurityConfig extends WebSecurityConfigurerAdapter {
 //             .antMatchers(HttpMethod.POST,"/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
 //             .antMatchers("/management/api/**").hasAnyRole(ADMINTRAINEE.name(),ADMIN.name()) //priority sensitive
              .anyRequest()
-             .authenticated()
-             .and()
+             .authenticated();
+
              //.httpBasic();
-             .formLogin()
-                 .loginPage("/login") // * or .permitAll() //this is gives me  an error but it should work
-                 .defaultSuccessUrl("/courses",true)
-                .passwordParameter("password")// "*"name of my input in html
-                .usernameParameter("username")//
-             .and()
-             .rememberMe()
-                 .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) //tokenRepository() you own repo (postgress,mysql) //defaults to 2 weeks
-                 .key("somethingVerySecured") //best practice using the default  one  provided by spring security
-             .rememberMeParameter("remember-me")
-             .and()
-             .logout()
-                 .logoutUrl("/logout")
-                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout",  "GET"))
-                 .clearAuthentication(true)
-                 .invalidateHttpSession(true)
-                 .deleteCookies("JSESSIONID","remember-me","JSESSIONID")
-                 .logoutSuccessUrl("/login");
 
 
     }
