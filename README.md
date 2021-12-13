@@ -10,7 +10,7 @@ my main focus on this project was spring boot security :
 2/form-auth
 
 
-3/jwt
+3/jwt (work in progress)
 
 every implementation is in a separate git-branch
 
